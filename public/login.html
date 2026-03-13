@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Expense Tracker</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Segoe UI", Arial, sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:80px;
+background:url("https://images.unsplash.com/photo-1554224155-1696413565d3") no-repeat center;
+background-size:cover;
+}
+
+/* background overlay blur */
+
+body::before{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(20,25,40,0.65);
+backdrop-filter:blur(4px);
+z-index:-1;
+}
+
+/* LEFT SIDE TEXT */
+
+.left{
+color:white;
+max-width:520px;
+}
+
+.left h1{
+font-size:46px;
+margin-bottom:20px;
+font-weight:600;
+}
+
+.left p{
+font-size:18px;
+opacity:0.85;
+line-height:1.6;
+}
+
+/* LOGIN CARD */
+
+.box{
+width:380px;
+padding:45px;
+border-radius:18px;
+background:rgba(255,255,255,0.96);
+text-align:center;
+box-shadow:0 25px 60px rgba(0,0,0,0.35);
+position:relative;
+transition:0.3s;
+border:1px solid rgba(255,255,255,0.4);
+}
+
+/* glow border */
+
+.box::before{
+content:"";
+position:absolute;
+top:-2px;
+left:-2px;
+right:-2px;
+bottom:-2px;
+border-radius:18px;
+background:linear-gradient(120deg,#4f46e5,#3b82f6,#60a5fa);
+z-index:-1;
+opacity:0.15;
+}
+
+.box:hover{
+transform:translateY(-4px);
+box-shadow:0 30px 70px rgba(0,0,0,0.45);
+}
+
+.logo{
+font-size:40px;
+margin-bottom:12px;
+}
+
+.box h2{
+margin-bottom:25px;
+font-size:24px;
+color:#333;
+}
+
+/* GOOGLE BUTTON */
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:8px;
+background:#4285F4;
+color:white;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:0.25s;
+}
+
+button:hover{
+background:#3367d6;
+transform:scale(1.02);
+}
+
+/* divider */
+
+.divider{
+margin:20px 0;
+height:1px;
+background:#eee;
+}
+
+.footer{
+margin-top:15px;
+font-size:12px;
+color:#777;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="left">
+
+<h1>Expense Tracker</h1>
+
+<p>
+Track your spending, manage your budget, and stay in control
+of your finances with a simple and secure expense tracker.
+</p>
+
+</div>
+
+<div class="box">
+
+<div class="logo">💰</div>
+
+<h2>Login</h2>
+
+<a href="/auth/google">
+<button>Sign in with Google</button>
+</a>
+
+<div class="divider"></div>
+
+<div class="footer">
+Secure login powered by Google
+</div>
+
+</div>
+
+</body>
+</html>
