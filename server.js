@@ -26,9 +26,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // ===== GOOGLE AUTH =====
 passport.use(new GoogleStrategy({
-  clientID: "97007693508-sc0p2fq9aofbeq5vbucgvgs0ihnpf56e.apps.googleusercontent.com",
-  clientSecret: "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",
-  callbackURL: "http://localhost:5000/auth/google/callback"
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: "/auth/google/callback"
 },
 (accessToken, refreshToken, profile, done) => {
   return done(null, profile);
