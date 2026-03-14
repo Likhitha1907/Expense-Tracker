@@ -8,6 +8,7 @@ const session = require("express-session");
 
 const app = express();
 
+require('dotenv').config();
 // ===== MIDDLEWARE =====
 app.use(cors());
 app.use(express.json());
