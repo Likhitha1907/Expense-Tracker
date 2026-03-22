@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -9,20 +11,28 @@ const session = require("express-session");
 const app = express();
 
 // ===== MIDDLEWARE =====
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL, // e.g. https://your-vercel-app.vercel.app
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use(session({
-  secret: "expense-secret",
+  secret: process.env.SESSION_SECRET || "expense-secret",
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false,
+  cookie: {
+    secure: true,        // required for HTTPS (Render)
+    httpOnly: true,
+    sameSite: "none"     // required for cross-site (Vercel ↔ Render)
+  }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, "public")));
-
 
 // ===== GOOGLE AUTH =====
 passport.use(new GoogleStrategy({
@@ -37,7 +47,6 @@ passport.use(new GoogleStrategy({
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
-
 // ===== LOGIN PAGE =====
 app.get("/", (req, res) => {
   if (req.isAuthenticated()) {
@@ -45,7 +54,6 @@ app.get("/", (req, res) => {
   }
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
-
 
 // ===== GOOGLE LOGIN =====
 app.get("/auth/google",
@@ -55,37 +63,32 @@ app.get("/auth/google",
 app.get("/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/" }),
   (req, res) => {
-    res.redirect("/dashboard");
+    res.redirect(process.env.FRONTEND_URL + "/dashboard");
   }
 );
 
-
 // ===== LOGOUT =====
 app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/");
+  req.logout(() => {
+    res.redirect(process.env.FRONTEND_URL);
   });
 });
-
 
 // ===== AUTH CHECK =====
 function ensureAuth(req, res, next) {
   if (req.isAuthenticated()) return next();
-  res.redirect("/");
+  res.status(401).json({ message: "Unauthorized" });
 }
-
 
 // ===== DASHBOARD PAGE =====
 app.get("/dashboard", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
-
 // ===== MONGODB =====
-mongoose.connect("mongodb://127.0.0.1:27017/expenseDB")
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
-
 
 // ===== SCHEMA =====
 const expenseSchema = new mongoose.Schema({
@@ -98,13 +101,11 @@ const expenseSchema = new mongoose.Schema({
 
 const Expense = mongoose.model("Expense", expenseSchema);
 
-
 // ===== GET EXPENSES =====
 app.get("/expenses", ensureAuth, async (req, res) => {
   const expenses = await Expense.find({ userId: req.user.id });
   res.json(expenses);
 });
-
 
 // ===== ADD EXPENSE =====
 app.post("/expenses", ensureAuth, async (req, res) => {
@@ -117,13 +118,11 @@ app.post("/expenses", ensureAuth, async (req, res) => {
   res.json(expense);
 });
 
-
 // ===== DELETE EXPENSE =====
 app.delete("/expenses/:id", ensureAuth, async (req, res) => {
   await Expense.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted successfully" });
 });
-
 
 // ===== UPDATE EXPENSE =====
 app.put("/expenses/:id", ensureAuth, async (req, res) => {
@@ -131,8 +130,9 @@ app.put("/expenses/:id", ensureAuth, async (req, res) => {
   res.json({ message: "Updated successfully" });
 });
 
-
 // ===== START SERVER =====
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
