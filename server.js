@@ -1,5 +1,3 @@
-// ===== LOAD ENV VARIABLES =====
-// This loads values from .env file into process.env
 require("dotenv").config();
 
 const express = require("express");
@@ -12,200 +10,168 @@ const session = require("express-session");
 
 const app = express();
 
+app.set("trust proxy", 1);
+// ---------------------- GENERAL REQUEST LOGGER ----------------------
+app.use((req, res, next) => {
+  console.log(`📌 Incoming Request: ${req.method} ${req.url}`);
+  console.log("Headers:", req.headers);
+  next();
+});
 
-// =====================================================
-// ===== MIDDLEWARE CONFIGURATION =======================
-// =====================================================
-
-// Enable CORS (IMPORTANT for Vercel frontend → Render backend)
+// ---------------------- CORS ----------------------
 app.use(cors({
-  origin: process.env.FRONTEND_URL, // your Vercel URL
-  credentials: true                // allow cookies/session
+  origin: process.env.FRONTEND_URL, // Vercel frontend
+  credentials: true
 }));
 
-// Parse JSON request bodies
+// ---------------------- JSON PARSER ----------------------
 app.use(express.json());
 
-
-// ===== SESSION CONFIGURATION =====
-// This is required for login persistence (user stays logged in)
+// ---------------------- SESSION ----------------------
 app.use(session({
-  secret: process.env.SESSION_SECRET || "expense-secret", // keep secret safe
+  secret: process.env.SESSION_SECRET || "expense-secret",
   resave: false,
   saveUninitialized: false,
-
   cookie: {
-    secure: true,        // REQUIRED for HTTPS (Render uses HTTPS)
-    sameSite: "none"     // REQUIRED for cross-site (Vercel ↔ Render)
+    secure: true,           // HTTPS only
+    httpOnly: true,
+    sameSite: "none"        // cross-origin required
+  }
+}));
+app.use(session({
+  secret: process.env.SESSION_SECRET || "expense-secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    sameSite: "none"
   }
 }));
 
-
-// Initialize Passport (authentication middleware)
+// ---------------------- PASSPORT ----------------------
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-// Serve static files (HTML, CSS, JS)
-app.use(express.static(path.join(__dirname, "public")));
+// ---------------------- STATIC FILES ----------------------
 
 
-// =====================================================
-// ===== GOOGLE AUTH STRATEGY ===========================
-// =====================================================
-
+// ---------------------- PASSPORT GOOGLE STRATEGY ----------------------
 passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,           // from Google Cloud
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,   // from Google Cloud
-  callbackURL: process.env.GOOGLE_CALLBACK_URL      // must match Google console
-},
-(accessToken, refreshToken, profile, done) => {
-  // This function runs after successful Google login
-
-  // profile contains user info from Google
-  // (name, email, id, etc.)
-
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: process.env.GOOGLE_CALLBACK_URL
+}, (accessToken, refreshToken, profile, done) => {
+  console.log("🔹 Google profile received:", profile);
   return done(null, profile);
 }));
 
-
-// ===== SESSION SERIALIZATION =====
-// Stores user data in session
 passport.serializeUser((user, done) => {
+  console.log("💾 serializeUser called:", user);
   done(null, user);
 });
 
-// Retrieves user from session
 passport.deserializeUser((user, done) => {
+  console.log("💾 deserializeUser called:", user);
   done(null, user);
 });
 
-
-// =====================================================
-// ===== ROUTES =========================================
-// =====================================================
-
-// ===== LOGIN PAGE =====
+// ---------------------- ROUTES ----------------------
 app.get("/", (req, res) => {
-  // If already logged in, go to dashboard
   if (req.isAuthenticated()) {
     return res.redirect("/dashboard");
   }
-
-  // Otherwise show login page
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
+// ---------------------- GOOGLE AUTH ----------------------
+app.get("/auth/google", (req, res, next) => {
+  console.log("🔹 Google login triggered");
+  console.log("Cookies received:", req.headers.cookie);
+  next();
+}, passport.authenticate("google", { scope: ["profile", "email"] }));
 
-// ===== GOOGLE LOGIN START =====
-// This route redirects user to Google login page
-app.get("/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"]
-  })
-);
-
-
-// ===== GOOGLE CALLBACK =====
-// Google redirects here after login
 app.get("/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/"
-  }),
+  passport.authenticate("google", { failureRedirect: "/" }),
   (req, res) => {
-    // On success, redirect to dashboard
+    console.log("🔹 Google callback triggered");
+    console.log("Cookies received:", req.headers.cookie);
+    console.log("User object:", req.user);
+    // Redirect to frontend dashboard
     res.redirect("/dashboard");
   }
 );
 
-
-// ===== LOGOUT =====
-app.get("/logout", (req, res) => {
-  req.logout(() => {
-    res.redirect("/");
+app.get("/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.redirect(process.env.FRONTEND_URL);
   });
 });
 
-
-// ===== AUTH MIDDLEWARE =====
-// Protects routes (only logged-in users can access)
+// ---------------------- AUTH MIDDLEWARE ----------------------
 function ensureAuth(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/");
 }
 
-
-// ===== DASHBOARD =====
+// ---------------------- DASHBOARD ----------------------
 app.get("/dashboard", ensureAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
 
-// =====================================================
-// ===== DATABASE CONNECTION ============================
-// =====================================================
-
-// Connect to MongoDB Atlas (NOT localhost in production)
+// ---------------------- MONGOOSE SETUP ----------------------
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log("MongoDB Error:", err));
 
-
-// ===== SCHEMA =====
+// ---------------------- EXPENSE MODEL ----------------------
 const expenseSchema = new mongoose.Schema({
   title: String,
   amount: Number,
   category: String,
   date: String,
-  userId: String
+  userId: String,
 });
 
 const Expense = mongoose.model("Expense", expenseSchema);
 
-
-// =====================================================
-// ===== API ROUTES =====================================
-// =====================================================
-
-// ===== GET EXPENSES =====
+// ---------------------- EXPENSE ROUTES ----------------------
 app.get("/expenses", ensureAuth, async (req, res) => {
-  const expenses = await Expense.find({ userId: req.user.id });
+  const expenses = await Expense.find({ userId: req.user.id || req.user._json.sub });
   res.json(expenses);
 });
 
-
-// ===== ADD EXPENSE =====
 app.post("/expenses", ensureAuth, async (req, res) => {
   const expense = new Expense({
     ...req.body,
-    userId: req.user.id
+    userId: req.user.id || req.user._json.sub
   });
-
   await expense.save();
   res.json(expense);
 });
 
-
-// ===== DELETE EXPENSE =====
 app.delete("/expenses/:id", ensureAuth, async (req, res) => {
   await Expense.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted successfully" });
 });
 
-
-// ===== UPDATE EXPENSE =====
 app.put("/expenses/:id", ensureAuth, async (req, res) => {
   await Expense.findByIdAndUpdate(req.params.id, req.body);
   res.json({ message: "Updated successfully" });
 });
 
+// ---------------------- ERROR HANDLER ----------------------
+app.use((err, req, res, next) => {
+  console.error("❌ Server Error:", err.stack);
+  res.status(500).send({ error: err.message });
+});
 
-// =====================================================
-// ===== START SERVER ==================================
-// =====================================================
+app.use(express.static(path.join(__dirname, "public")));
 
+// ---------------------- START SERVER ----------------------
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
