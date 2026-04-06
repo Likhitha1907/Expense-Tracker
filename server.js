@@ -142,7 +142,7 @@ app.get("/auth/google/callback", (req, res, next) => {
   }),
   (req, res) => {
     // On success, redirect to dashboard
-    res.redirect("/dashboard");
+    res.redirect(process.env.FRONTEND_URL + "/dashboard");
   }
 );
 
@@ -197,19 +197,28 @@ const Expense = mongoose.model("Expense", expenseSchema);
 
 // ===== GET EXPENSES =====
 app.get("/expenses", ensureAuth, async (req, res) => {
+  console.log("Fetching for user:", req.user.id);
+
   const expenses = await Expense.find({ userId: req.user.id });
+  console.log("Found:", expenses);
+
   res.json(expenses);
 });
 
 
 // ===== ADD EXPENSE =====
 app.post("/expenses", ensureAuth, async (req, res) => {
+  console.log("Incoming data:", req.body);
+  console.log("User:", req.user);
+
   const expense = new Expense({
     ...req.body,
     userId: req.user.id
   });
 
   await expense.save();
+  console.log("Saved:", expense);
+
   res.json(expense);
 });
 
