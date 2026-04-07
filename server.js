@@ -150,7 +150,7 @@ app.get("/auth/google/callback", (req, res, next) => {
 // ===== LOGOUT =====
 app.get("/logout", (req, res) => {
   req.logout(() => {
-    res.redirect("/");
+    res.redirect(process.env.FRONTEND_URL);
   });
 });
 
