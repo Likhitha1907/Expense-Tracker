@@ -107,7 +107,7 @@ passport.deserializeUser((user, done) => {
 app.get("/", (req, res) => {
   // If already logged in, go to dashboard
   if (req.isAuthenticated()) {
-    return res.redirect("/dashboard");
+    return res.redirect(process.env.FRONTEND_URL);
   }
 
   // Otherwise show login page
