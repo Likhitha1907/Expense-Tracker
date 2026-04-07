@@ -6,139 +6,57 @@
 
   <style>
     body {
-      font-family: Arial;
       margin: 0;
-      background: #f5f7fa;
-    }
-
-    header {
-      background: #4f46e5;
-      color: white;
-      padding: 15px 30px;
+      font-family: Arial, sans-serif;
+      height: 100vh;
       display: flex;
-      justify-content: space-between;
-    }
+      justify-content: center;
+      align-items: center;
 
-    .hero {
-      text-align: center;
-      padding: 40px;
-      background: #eef2ff;
+      /* BACKGROUND IMAGE */
+      background: url("https://images.unsplash.com/photo-1554224155-6726b3ff858f") no-repeat center center/cover;
     }
 
     .container {
-      width: 80%;
-      margin: 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
 
-    input, button {
-      padding: 10px;
-      margin: 5px;
+    h1 {
+      margin-bottom: 20px;
     }
 
     button {
-      background: #4f46e5;
+      background-color: #4285F4;
       color: white;
       border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    .expense {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
+    button:hover {
+      background-color: #357ae8;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <h2>Expense Tracker</h2>
-  <button onclick="logout()">Logout</button>
-</header>
+  <div class="container">
+    <h1>Expense Tracker</h1>
+    <button onclick="loginWithGoogle()">Sign in with Google</button>
+  </div>
 
-<section class="hero">
-  <h1>Track Your Expenses 💸</h1>
-  <p>Add, view, and manage your expenses easily</p>
-</section>
-
-<div class="container">
-
-  <!-- LOGIN BUTTON -->
-  <button onclick="loginWithGoogle()">Sign in with Google</button>
-
-  <!-- ADD EXPENSE -->
-  <h3>Add Expense</h3>
-  <input type="text" id="title" placeholder="Title">
-  <input type="number" id="amount" placeholder="Amount">
-  <button onclick="addExpense()">Add</button>
-
-  <!-- EXPENSE LIST -->
-  <h3>My Expenses</h3>
-  <div id="expenseList"></div>
-
-</div>
-
-<script>
-const API = "https://expense-tracker-backend-13y9.onrender.com";
-
-// ✅ GOOGLE LOGIN
-function loginWithGoogle() {
-  window.location.href = API + "/auth/google";
-}
-
-// ✅ LOGOUT
-function logout() {
-  window.location.href = API + "/logout";
-}
-
-// ✅ LOAD EXPENSES
-async function loadExpenses() {
-  try {
-    const res = await fetch(API + "/expenses", {
-      credentials: "include"
-    });
-
-    const data = await res.json();
-
-    const list = document.getElementById("expenseList");
-    list.innerHTML = "";
-
-    data.forEach(exp => {
-      list.innerHTML += `
-        <div class="expense">
-          <strong>${exp.title}</strong> - ₹${exp.amount}
-        </div>
-      `;
-    });
-
-  } catch (err) {
-    console.log("Error:", err);
-  }
-}
-
-// ✅ ADD EXPENSE
-async function addExpense() {
-  const title = document.getElementById("title").value;
-  const amount = document.getElementById("amount").value;
-
-  await fetch(API + "/expenses", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ title, amount })
-  });
-
-  loadExpenses(); // refresh list
-}
-
-// ✅ LOAD ON PAGE START
-loadExpenses();
-</script>
+  <script>
+    function loginWithGoogle() {
+      window.location.href = "https://expense-tracker-backend-13y9.onrender.com/auth/google";
+    }
+  </script>
 
 </body>
 </html>

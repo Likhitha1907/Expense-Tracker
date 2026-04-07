@@ -78,7 +78,9 @@ margin-left:5px;
 <body>
 
 <div class="topbar">
-<a href="/logout"><button class="logout">Logout</button></a>
+<a href="https://expense-tracker-backend-13y9.onrender.com/logout">
+<button class="logout">Logout</button>
+</a>
 </div>
 
 <div class="container">
@@ -112,14 +114,20 @@ margin-left:5px;
 
 <script>
 
+const API = "https://expense-tracker-backend-13y9.onrender.com";
+
 const form = document.getElementById("expenseForm");
 const list = document.getElementById("expenseList");
 
 let editId = null;
 
+// ✅ LOAD EXPENSES
 async function loadExpenses(){
+try {
+const res = await fetch(API + "/expenses", {
+  credentials: "include"
+});
 
-const res = await fetch("/expenses");
 const data = await res.json();
 
 list.innerHTML = "";
@@ -138,27 +146,23 @@ const editBtn = document.createElement("button");
 editBtn.innerText = "Edit";
 
 editBtn.onclick = () => {
-
 editId = exp._id;
 
 document.getElementById("title").value = exp.title;
 document.getElementById("amount").value = exp.amount;
 document.getElementById("category").value = exp.category;
 document.getElementById("date").value = exp.date;
-
 };
 
 const deleteBtn = document.createElement("button");
 deleteBtn.innerText = "Delete";
 
 deleteBtn.onclick = async () => {
-
-await fetch("/expenses/" + exp._id,{
-method:"DELETE"
+await fetch(API + "/expenses/" + exp._id,{
+  method:"DELETE",
+  credentials:"include"
 });
-
 loadExpenses();
-
 };
 
 actions.appendChild(editBtn);
@@ -171,8 +175,12 @@ list.appendChild(li);
 
 });
 
+} catch(err){
+console.log("Error:", err);
+}
 }
 
+// ✅ ADD / UPDATE EXPENSE
 form.addEventListener("submit", async (e)=>{
 
 e.preventDefault();
@@ -184,30 +192,32 @@ const date = document.getElementById("date").value;
 
 if(editId){
 
-await fetch("/expenses/" + editId,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({title,amount,category,date})
+await fetch(API + "/expenses/" + editId,{
+  method:"PUT",
+  credentials:"include",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({title,amount,category,date})
 });
 
 editId = null;
 
 }else{
 
-await fetch("/expenses",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({title,amount,category,date})
+await fetch(API + "/expenses",{
+  method:"POST",
+  credentials:"include",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({title,amount,category,date})
 });
 
 }
 
 form.reset();
-
 loadExpenses();
 
 });
 
+// ✅ LOAD ON START
 loadExpenses();
 
 </script>
