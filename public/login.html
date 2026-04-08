@@ -1,62 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Expense Tracker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: 'Segoe UI', sans-serif;
+}
 
-      /* BACKGROUND IMAGE */
-      background: url("https://images.unsplash.com/photo-1554224155-6726b3ff858f") no-repeat center center/cover;
-    }
+body{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
 
-    .container {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 40px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
+/* 🔥 Premium background */
+background:linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)),
+url("https://images.unsplash.com/photo-1554224155-6726b3ff858f") no-repeat center/cover;
+}
 
-    h1 {
-      margin-bottom: 20px;
-    }
+/* Glass card */
+.container{
+background:rgba(255,255,255,0.08);
+backdrop-filter: blur(15px);
+padding:40px;
+border-radius:15px;
+width:380px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
+}
 
-    button {
-      background-color: #4285F4;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+/* Title */
+h1{
+font-size:32px;
+margin-bottom:15px;
+}
 
-    button:hover {
-      background-color: #357ae8;
-    }
-  </style>
+/* Subtitle */
+p{
+font-size:15px;
+color:#ddd;
+margin-bottom:30px;
+line-height:1.5;
+}
+
+/* Button */
+button{
+width:100%;
+padding:12px;
+font-size:16px;
+background:linear-gradient(45deg,#1e88e5,#42a5f5);
+border:none;
+color:white;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.05);
+background:linear-gradient(45deg,#1565c0,#1e88e5);
+}
+
+/* Footer */
+.footer{
+margin-top:20px;
+font-size:12px;
+color:#bbb;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="container">
-    <h1>Expense Tracker</h1>
-    <button onclick="loginWithGoogle()">Sign in with Google</button>
-  </div>
+<div class="container">
 
-  <script>
-    function loginWithGoogle() {
-      window.location.href = "https://expense-tracker-backend-13y9.onrender.com/auth/google";
-    }
-  </script>
+<h1>💸 Expense Tracker</h1>
+
+<p>
+Track your expenses, manage your budget, and stay in control of your finances.
+Simple, fast and secure.
+</p>
+
+<button onclick="loginWithGoogle()">
+🔐 Sign in with Google
+</button>
+
+<div class="footer">
+Secure login powered by Google
+</div>
+
+</div>
+
+<script>
+function loginWithGoogle(){
+window.location.href = "https://expense-tracker-backend-13y9.onrender.com/auth/google";
+}
+</script>
 
 </body>
 </html>
