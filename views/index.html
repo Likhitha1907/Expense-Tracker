@@ -5,73 +5,80 @@
 
 <style>
 body{
-font-family: Arial;
-background:#f4f6f8;
-display:flex;
-justify-content:center;
-padding-top:60px;
-}
-
-.topbar{
-position:absolute;
-top:20px;
-right:20px;
-}
-
-.logout{
-background:#e53935;
-color:white;
-border:none;
-padding:10px 15px;
-border-radius:6px;
-cursor:pointer;
+  font-family: 'Segoe UI', sans-serif;
+background:#eef2f7;
+margin:0;
 }
 
 .container{
 background:white;
 padding:25px;
-border-radius:10px;
-width:450px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
+border-radius:12px;
+width:500px;
+margin:auto;
+margin-top:60px;
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
 }
 
 input,select,button{
 width:100%;
 padding:10px;
 margin-top:10px;
-border-radius:6px;
+border-radius:8px;
 border:1px solid #ccc;
 }
 
 button{
-background:#1e88e5;
+background:#4f46e5;
 color:white;
+font-weight:bold;
 border:none;
 cursor:pointer;
-font-weight:bold;
 }
 
-ul{
-list-style:none;
-padding:0;
-margin-top:20px;
+button:hover{
+background:#4338ca;
 }
 
+/* Expense Cards */
 li{
-background:#f1f1f1;
-padding:10px;
-margin-top:8px;
-border-radius:6px;
+background:white;
+padding:15px;
+margin-top:12px;
+border-radius:10px;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
 display:flex;
 justify-content:space-between;
 align-items:center;
 }
 
-.actions button{
-width:auto;
-padding:5px 10px;
-margin-left:5px;
+/* Category badge */
+.category{
+padding:4px 10px;
+border-radius:6px;
+font-size:12px;
+background:#e0e7ff;
+color:#3730a3;
+margin-left:10px;
 }
+
+/* Actions */
+.actions button{
+background:#ef4444;
+margin-left:5px;
+padding:5px 10px;
+border-radius:6px;
+}
+
+.actions button:first-child{
+background:#22c55e;
+}
+
 </style>
 </head>
 
@@ -96,11 +103,20 @@ margin-left:5px;
 <input id="date" type="date" required>
 
 <select id="category" required>
-<option value="">Select Category</option>
-<option value="Food">Food</option>
-<option value="Travel">Travel</option>
-<option value="Shopping">Shopping</option>
-</select>
+  <option value="">Select Category</option>
+  
+  <option value="Food">🍔 Food</option>
+  <option value="Travel">✈️ Travel</option>
+  <option value="Shopping">🛍️ Shopping</option>
+  <option value="Bills">💡 Bills</option>
+  <option value="Entertainment">🎬 Entertainment</option>
+  <option value="Health">🏥 Health</option>
+  <option value="Education">📚 Education</option>
+  <option value="Transport">🚗 Transport</option>
+  <option value="Groceries">🛒 Groceries</option>
+  <option value="Others">📦 Others</option>
+  
+  </select>
 
 <button type="submit">Save Expense</button>
 
@@ -137,7 +153,11 @@ data.forEach(exp => {
 const li = document.createElement("li");
 
 const text = document.createElement("span");
-text.innerText = `${exp.title} - ₹${exp.amount} (${exp.category}) - ${exp.date}`;
+text.innerHTML = `
+<strong>${exp.title}</strong> - ₹${exp.amount}
+<span class="category">${exp.category}</span>
+<br><small>${exp.date}</small>
+`;
 
 const actions = document.createElement("div");
 actions.className = "actions";
